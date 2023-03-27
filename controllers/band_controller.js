@@ -19,35 +19,54 @@ band.get('/', async (req, res) => {
     }
 })
 
-// FIND A SPECIFIC BAND
+// FIND ONE BAND BY ID
 band.get('/:name', async (req, res) => {
     try {
         const foundBand = await Band.findOne({
-            where: { name: req.params.name  },
-            include: [ 
-                { 
-                    model: Meet_Greet, 
-                    as: "meet_greet",
-                    include: { 
-                        model: Event, 
-                        as: "event",
-                        where: { name: {[Op.like]: `%${req.query.event ? req.query.event : ''}%`} } 
-                    } 
+            attributes: [['name', 'Band Name'], ['available_start_time', 'Start Time'], ['end_time', 'End Time']],
+            where: {
+                name: req.params.name
+            },
+            include: [
+                {
+                    model: Meet_Greet,
+                    as: 'meet_greets',
+                    attributes: {
+                        exclude: ['meet_greet_id', 'band_id', 'event_id']
+                    },
+                    include: {
+                        model: Event,
+                        as: 'event',
+                        attributes: {
+                            exclude: ['event_id']
+                        },
+                        where: {
+                            name: { [Op.like]: `%${req.query.event ? req.query.event : ''}%` }
+                        }
+                    }
                 },
-                { 
+                {
                     model: Set_Time,
-                    as: "set_time",
-                    include: { 
-                        model: Event, 
-                        as: "event", 
-                        where: { name: { [Op.like]: `%${req.query.event ? req.query.event : ''}%` } }
+                    as: 'set_times',
+                    attributes: {
+                        exclude: ['set_time_id', 'event_id', 'band_id', 'stage_id']
+                    },
+                    include: {
+                        model: Event,
+                        as: 'event',
+                        attributes: {
+                            exclude: ['event_id']
+                        },
+                        where: {
+                            name: { [Op.like]: `%${req.query.event ? req.query.event : ''}%` }
+                        }
                     }
                 }
-            ] 
+            ]
         })
         res.status(200).json(foundBand)
-    } catch (error) {
-        res.status(500).json(error)
+    } catch (e) {
+        res.status(500).json(e)
     }
 })
 
