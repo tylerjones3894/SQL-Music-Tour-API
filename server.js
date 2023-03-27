@@ -28,6 +28,10 @@ app.get('/', (req, res) => {
 // CONTROLLERS 
 const bandController = require('./controllers/band_controller')
 app.use('/band', bandController)
+const eventController = require('./controllers/event_controller')
+app.use('/event', eventController)
+const stageController = require('./controllers/stage_controller')
+app.use('/stage', stageController)
 
 // LISTEN
 app.listen(process.env.PORT, () => {
